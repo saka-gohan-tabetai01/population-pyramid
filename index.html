@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>人口ピラミッド（年齢別）</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body { font-family: sans-serif; }
+    .bar-men { fill: steelblue; }
+    .bar-women { fill: lightpink; }
+    .axis text { font-size: 12px; }
+    .label { font-weight: bold; font-size: 20px; }
+  </style>
+</head>
+<body>
+  <h1>人口ピラミッド（年齢別）</h1>
+  <div>
+    <label>年を選択：</label>
+    <input type="range" id="yearSlider" min="1970" max="1970" step="1" value="1970" disabled>
+    <span id="yearLabel">1970</span>
+  </div>
+  <svg width="960" height="600"></svg>
+
+  <script>
+    const data = [
+      { age: "0-4", men: -480000, women: 480000 },
+      { age: "5-9", men: -520000, women: 500000 },
+      { age: "10-14", men: -520000, women: 510000 },
+      { age: "15-19", men: -550000, women: 540000 },
+      { age: "20-24", men: -560000, women: 550000 },
+      { age: "25-29", men: -580000, women: 560000 },
+      { age: "30-34", men: -600000, women: 600000 },
+      { age: "35-39", men: -620000, women: 620000 },
+      { age: "40-44", men: -610000, women: 610000 },
+      { age: "45-49", men: -590000, women: 590000 },
+      { age: "50-54", men: -570000, women: 570000 },
+      { age: "55-59", men: -540000, women: 540000 },
+      { age: "60-64", men: -500000, women: 490000 },
+      { age: "65-69", men: -460000, women: 460000 },
+      { age: "70-74", men: -400000, women: 400000 },
+      { age: "75-79", men: -340000, women: 420000 },
+      { age: "80-84", men: -280000, women: 380000 },
+      { age: "85-89", men: -200000, women: 320000 },
+      { age: "90+", men: -120000, women: 240000 }
+    ];
+
+    const svg = d3.select("svg");
+    const width = +svg.attr("width") - 200;
+    const height = +svg.attr("height") - 100;
+    const margin = { top: 50, right: 50, bottom: 50, left: 150 };
+
+    const x = d3.scaleLinear()
+      .domain([-700000, 700000])
+      .range([margin.left, width - margin.right]);
+
+    const y = d3.scaleBand()
+      .domain(data.map(d => d.age))
+      .range([margin.top, height - margin.bottom])
+      .padding(0.1);
+
+    svg.append("g")
+      .attr("transform", `translate(0,${height - margin.bottom})`)
+      .call(d3.axisBottom(x).ticks(10).tickFormat(d3.format(".2s")));
+
+    svg.append("g")
+      .attr("transform", `translate(${margin.left},0)`)
+      .call(d3.axisLeft(y));
+
+    svg.selectAll(".bar-men")
+      .data(data)
+      .enter()
+      .append("rect")
+        .attr("class", "bar-men")
+        .attr("x", d => x(d.men))
+        .attr("y", d => y(d.age))
+        .attr("width", d => x(0) - x(d.men))
+        .attr("height", y.bandwidth());
+
+    svg.selectAll(".bar-women")
+      .data(data)
+      .enter()
+      .append("rect")
+        .attr("class", "bar-women")
+        .attr("x", x(0))
+        .attr("y", d => y(d.age))
+        .attr("width", d => x(d.women) - x(0))
+        .attr("height", y.bandwidth());
+
+    document.getElementById("yearSlider").addEventListener("input", function() {
+      document.getElementById("yearLabel").textContent = this.value;
+    });
+  </script>
+</body>
+</html>
