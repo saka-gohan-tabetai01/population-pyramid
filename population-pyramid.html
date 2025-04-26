@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>人口ピラミッド（スライダー付き）</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body { font-family: sans-serif; margin: 40px; }
+    svg { background: #f9f9f9; }
+    .axis text { font-size: 10px; }
+  </style>
+</head>
+<body>
+
+<h1>人口ピラミッド（年齢別）</h1>
+<label for="year">年を選択：</label>
+<input type="range" id="year" min="1970" max="1970" value="1970" step="1">
+<span id="year-value">1970</span>
+
+<svg width="800" height="600"></svg>
+
+<script>
+// サンプルデータ
+const data = [
+  { age: "0-4", men: -480000, women: 460000 },
+  { age: "5-9", men: -500000, women: 480000 },
+  { age: "10-14", men: -510000, women: 490000 },
+  { age: "15-19", men: -520000, women: 500000 },
+  { age: "20-24", men: -530000, women: 510000 },
+  { age: "25-29", men: -540000, women: 520000 },
+  { age: "30-34", men: -550000, women: 530000 },
+  { age: "35-39", men: -560000, women: 540000 },
+  { age: "40-44", men: -520000, women: 500000 },
+  { age: "45-49", men: -480000, women: 460000 },
+  { age: "50-54", men: -440000, women: 420000 },
+  { age: "55-59", men: -400000, women: 380000 },
+  { age: "60-64", men: -350000, women: 330000 },
+  { age: "65-69", men: -300000, women: 280000 },
+  { age: "70-74", men: -250000, women: 230000 },
+  { age: "75-79", men: -200000, women: 180000 },
+  { age: "80-84", men: -150000, women: 130000 },
+  { age: "85-89", men: -100000, women: 80000 },
+  { age: "90+", men: -50000, women: 40000 }
+];
+
+// SVG設定
+const svg = d3.select("svg");
+const width = +svg.attr("width");
+const height = +svg.attr("height");
+const margin = { top: 40, right: 40, bottom: 40, left: 40 };
+const chartWidth = width - margin.left - margin.right;
+const chartHeight = height - margin.top - margin.bottom;
+
+// スケール
+const x = d3.scaleLinear()
+    .domain([-700000, 700000])
+    .range([0, chartWidth]);
+
+const y = d3.scaleBand()
+    .domain(data.map(d => d.age))
+    .range([0, chartHeight])
+    .padding(0.1);
+
+// グループ
+const g = svg.append("g")
+    .attr("transform", `translate(${margin.left + chartWidth/2},${margin.top})`);
+
+// 軸
+g.append("g")
+    .call(d3.axisLeft(y).tickSize(0))
+    .selectAll("text")
+    .style("text-anchor", "end");
+
+g.append("g")
+    .attr("transform", `translate(0,${chartHeight})`)
+    .call(d3.axisBottom(x).ticks(5).tickFormat(d => Math.abs(d / 1000) + "k"));
+
+// 棒グラフ
+const bars = g.selectAll(".bar")
+    .data(data)
+    .enter().append("g");
+
+bars.append("rect")
+    .attr("x", d => x(Math.min(0, d.men)))
+    .attr("y", d => y(d.age))
+    .attr("width", d => Math.abs(x(d.men) - x(0)))
+    .attr("height", y.bandwidth())
+    .attr("fill", "steelblue");
+
+bars.append("rect")
+    .attr("x", x(0))
+    .attr("y", d => y(d.age))
+    .attr("width", d => Math.abs(x(d.women) - x(0)))
+    .attr("height", y.bandwidth())
+    .attr("fill", "lightpink");
+
+// スライダー反映
+const yearInput = document.getElementById("year");
+const yearValue = document.getElementById("year-value");
+
+yearInput.addEventListener("input", function() {
+  yearValue.textContent = this.value;
+  // 本来はthis.valueによってdataを切り替える
+  // 今はダミーデータのため変化なし
+});
+</script>
+
+</body>
+</html>
